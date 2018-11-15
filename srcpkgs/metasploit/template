@@ -1,0 +1,44 @@
+# Template file for 'intellij-idea-community-edition'
+pkgname=metasploit
+version=4.17.14
+revision=1
+depends="ruby libpcap postgresql-libs libxslt libxml2 git"
+short_desc="Penetration testing framework"
+maintainer="Rien Maertens <maertensrien@gmail.com>"
+license="BSD"
+homepage="https://www.metasploit.com/"
+distfiles="https://github.com/rapid7/metasploit-framework/archive/${version}.tar.gz"
+checksum=1915d67a5469ffa01a5904e7dd11045905a75f2bfc0a33d9a1f77ef945538774
+only_for_archs="x86_64"
+
+post_extract() {
+    bundle config build.nokogiri --use-system-libraries
+    sed 's|git ls-files|find -type f|' -i metasploit-framework.gemspec
+}
+
+build() {
+    cd
+}
+
+do_install() {
+	vmkdir usr/bin
+	vmkdir usr/share/doc/intellij-idea
+	vmkdir usr/share/intellij-idea
+
+	mv bin lib plugins redist ${DESTDIR}/usr/share/intellij-idea
+	mv LICENSE.txt NOTICE.txt build.txt license ${DESTDIR}/usr/share/doc/intellij-idea
+	rm ${DESTDIR}/usr/share/intellij-idea/bin/fsnotifier-arm
+	if [ "$XBPS_TARGET_MACHINE" = "x86_64" ]; then
+		rm ${DESTDIR}/usr/share/intellij-idea/bin/fsnotifier
+		rm ${DESTDIR}/usr/share/intellij-idea/bin/idea.vmoptions
+		rm ${DESTDIR}/usr/share/intellij-idea/lib/libpty/linux/x86/libpty.so
+		rm ${DESTDIR}/usr/share/intellij-idea/plugins/android/lib/libwebp/linux/libwebp_jni.so
+	else
+		rm ${DESTDIR}/usr/share/intellij-idea/bin/fsnotifier64
+		rm ${DESTDIR}/usr/share/intellij-idea/bin/idea64.vmoptions
+		rm ${DESTDIR}/usr/share/intellij-idea/lib/libpty/linux/x86_64/libpty.so
+		rm ${DESTDIR}/usr/share/intellij-idea/plugins/android/lib/libwebp/linux/libwebp_jni64.so
+	fi
+
+	ln -sf /usr/share/intellij-idea/bin/idea.sh ${DESTDIR}/usr/bin/idea
+}
